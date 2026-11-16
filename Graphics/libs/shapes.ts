@@ -83,40 +83,64 @@ function shapeF_centered() : twgl.Arrays {
 }
 
 function smiley(radius: number) : twgl.Arrays {
-    // The arrays are initially empty
     const positionData: number[] = [];
     const colorData: number[] = [];
     const indexData: number[] = [];
 
-    // TODO: Create you own shape for a smiley face
-    //  - Add coordinates as pairs of elements into the positionData array
-    //  - Add color values as 3 values (RBG) into the colorData array
-    //  - Add index for the order in which vertices are connected, 3 values for each triangle
-    // HINT: You can use polar coordinates to define the positions of vertices,
-    // using the radius and an angle. Then convert them to polar coordinates.
+    const LADOS = 40;
 
-    // Sample data for a single yellow triangle. Replace with your values.
-    positionData.push(0, 100);
-    positionData.push(-120, -100);
-    positionData.push(120, -100);
-    colorData.push(0.9, 0.8, 0, 1);
-    colorData.push(0.9, 0.8, 0, 1);
-    colorData.push(0.9, 0.8, 0, 1);
+    positionData.push(0, 0);
+    colorData.push(1, 1, 0.6, 1);
+    for (let i = 0; i < LADOS; i++) {
+        const angulo = (2 * Math.PI * i) / LADOS;
+        positionData.push(radius * Math.cos(angulo), radius * Math.sin(angulo));
+        colorData.push(1, 0.75, 0, 1);
+    }
+    for (let i = 1; i <= LADOS; i++) {
+        const siguiente = i === LADOS ? 1 : i + 1;
+        indexData.push(0, siguiente, i);
+    }
 
-    indexData.push(0, 2, 1);
+    let v = positionData.length / 2;
+    positionData.push(-0.45 * radius, 0.15 * radius);
+    positionData.push(-0.35 * radius, 0.40 * radius);
+    positionData.push(-0.25 * radius, 0.15 * radius);
+    colorData.push(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1);
+    indexData.push(v, v + 1, v + 2);
 
+    v = positionData.length / 2;
+    positionData.push(0.25 * radius, 0.15 * radius);
+    positionData.push(0.35 * radius, 0.40 * radius);
+    positionData.push(0.45 * radius, 0.15 * radius);
+    colorData.push(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1);
+    indexData.push(v, v + 1, v + 2);
 
+    v = positionData.length / 2;
+    positionData.push(-0.08 * radius, -0.10 * radius);
+    positionData.push(0, 0.10 * radius);
+    positionData.push(0.08 * radius, -0.10 * radius);
+    colorData.push(1, 0.4, 0, 1, 1, 0.4, 0, 1, 1, 0.4, 0, 1);
+    indexData.push(v, v + 1, v + 2);
 
+    v = positionData.length / 2;
+    positionData.push(-0.50 * radius, -0.25 * radius);
+    positionData.push(0.50 * radius, -0.25 * radius);
+    positionData.push(0, -0.55 * radius);
+    colorData.push(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1);
+    indexData.push(v, v + 1, v + 2);
 
+    v = positionData.length / 2;
+    positionData.push(-0.15 * radius, -0.40 * radius);
+    positionData.push(0.15 * radius, -0.40 * radius);
+    positionData.push(0, -0.52 * radius);
+    colorData.push(1, 0.2, 0.3, 1, 1, 0.2, 0.3, 1, 1, 0.2, 0.3, 1);
+    indexData.push(v, v + 1, v + 2);
 
-    // Build the final object with the arrays for positions, colors, and indices
     const arrays: twgl.Arrays = {
         a_position: { numComponents: 2, data: positionData },
-        a_color:    { numComponents: 4, data: colorData },
-        indices:    { numComponents: 3, data: indexData },
+        a_color: { numComponents: 4, data: colorData },
+        indices: { numComponents: 3, data: indexData },
     };
-
-    console.log(arrays);
 
     return arrays;
 }
@@ -154,6 +178,7 @@ function diamond(size: number) : twgl.Arrays {
 
     return arrays;
 }
+
 
 function car2D() : twgl.Arrays {
     let arrays = {
