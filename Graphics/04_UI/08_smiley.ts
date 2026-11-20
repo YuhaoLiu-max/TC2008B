@@ -9,7 +9,7 @@
 
 import * as twgl from 'twgl-base.js';
 import GUI from 'lil-gui';
-import { diamond, shapeF_centered, smiley } from '../libs/shapes.js';
+import { diamond, smiley } from '../libs/shapes.js';
 import { V2, M3, type Vec2, type Mat3 } from '../libs/2d-lib.js';
 import { Scene } from '../libs/scene.js';
 import { type Color } from '../libs/color.js';
@@ -18,23 +18,32 @@ import { type Color } from '../libs/color.js';
 import vsGLSL from './vs_matrices_vcolor.glsl?raw';
 import fsGLSL from './fs_vertex_color.glsl?raw';
 
+const ORDERS: string[] = [
+    'scale -> rotation -> translation',
+    'scale -> translation -> rotation',
+    'translation -> scale -> rotation',
+    'rotation -> translation -> scale',
+    'rotation -> scale -> translation',
+];
 
 /*
  * Subclass of Scene with the particular objects and settings for this example.
  * Specifies the objects that will be used, and the UI operations available.
  */
 class RotationScene extends Scene {
+    settings = { order: 'scale -> translation -> rotation' };
+
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vsGLSL, fsGLSL);
 
         // Create the objects for this scene
         const model = this.addObject('model', smiley(150),
-            [ Math.random(), Math.random(), Math.random(), 1 ]);
+            [ 1, 1 ,1, 1 ]);
         model.transforms.t.x = gl.canvas.width / 2;
         model.transforms.t.y = gl.canvas.height / 2;
 
         const pivot = this.addObject('pivot', diamond(30),
-            [ 0.6, 0.6, 0.6, 1]);
+            [ 1, 1, 1, 1]);
         pivot.transforms.t.x = gl.canvas.width / 2;
         pivot.transforms.t.y = gl.canvas.height / 2;
     }
@@ -57,16 +66,27 @@ class RotationScene extends Scene {
                                                    pivot.transforms.t.y);
 
         // Transform matrices for the model
-        // TODO: Create the matrices necessary
+        const scaleMatrix: Mat3 = M3.scale(v2_scale);
+        const translateMatrix: Mat3 = M3.translation(v2_trans);
 
+        let rotateMatrix: Mat3 = M3.translation(v2_pivot_to_center);
+        rotateMatrix = M3.multiply(M3.rotation(model.transforms.rr.z), rotateMatrix);
+        rotateMatrix = M3.multiply(M3.translation(v2_center_to_pivot), rotateMatrix);
 
+        const matrices: Record<string, Mat3> = {
+            scale: scaleMatrix,
+            rotation: rotateMatrix,
+            translation: translateMatrix,
+        };
 
         // Create a composite transform matrix
         let modelTransforms: Mat3 = M3.identity();
-        // TODO: Multiply the matrices in the correct order to obtain the required results
-
-
-
+        for (const name of this.settings.order.split(' -> ')) {
+            const matrix = matrices[name];
+            if (matrix) {
+                modelTransforms = M3.multiply(matrix, modelTransforms);
+            }
+        }
 
         gl.useProgram(programInfo.program);
 
@@ -102,6 +122,7 @@ class RotationScene extends Scene {
         const pivot = this.getObject('pivot');
 
         const gui = new GUI();
+        gui.add(this.settings, 'order', ORDERS).name('Order');
 
         const modelFolder = gui.addFolder('Model');
 

@@ -61,14 +61,20 @@ class RotationScene extends Scene {
                                                    pivot.transforms.t.y);
 
 
-        // Transform matrices for the model
-        // TODO: Create the matrices necessary
-
-
+                // Transform matrices for the model
+        const scaMat: Mat3 = M3.scale(v2_scale);
+        const traMat: Mat3 = M3.translation(v2_trans);
+        const rotMat: Mat3 = M3.rotation(model.transforms.rr.z);
+        const pivotToCenterMat: Mat3 = M3.translation(v2_pivot_to_center);
+        const centerToPivotMat: Mat3 = M3.translation(v2_center_to_pivot);
 
         // Create a composite transform matrix
         let modelTransforms: Mat3 = M3.identity();
-        // TODO: Multiply the matrices in the correct order to obtain the required results
+        modelTransforms = M3.multiply(scaMat, modelTransforms);           
+        modelTransforms = M3.multiply(traMat, modelTransforms);           
+        modelTransforms = M3.multiply(pivotToCenterMat, modelTransforms); 
+        modelTransforms = M3.multiply(rotMat, modelTransforms);          
+        modelTransforms = M3.multiply(centerToPivotMat, modelTransforms); 
 
 
 
